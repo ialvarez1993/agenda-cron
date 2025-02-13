@@ -6,7 +6,9 @@ var logger = require("morgan");
 var Agenda = require("agenda");
 var Agendash = require("agendash");
 const axios = require("axios");
+require("dotenv").config();
 
+const apiUrl = process.env.API;
 var indexRouter = require("./routes/index");
 
 var app = express();
@@ -23,7 +25,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Initialize Agenda
 var agenda = new Agenda({
-  db: { address: "mongodb://localhost:27017/agenda" },
+  db: { address: "mongodb://127.0.0.1:27017/agenda" },
 });
 
 // Function to define a job with a given name and a given function
@@ -38,56 +40,56 @@ function defineJob(name, func) {
 
 // Define a sync service calls from SAP
 defineJob("Get service calls from SAP", async () => {
-  const url = "http://localhost:3001/api/v1/service-calls/sap/sync/";
+  const url = `${apiUrl}/service-calls/sap/sync/`;
   const response = await axios.get(url);
   console.log(response.data);
 });
 
 // Define job for sending service calls to mobile app
 defineJob("Send service calls to mobile app", async () => {
-  const url = "http://localhost:3001/api/v1/service-calls/mobile/sync/";
+  const url = `${apiUrl}/service-calls/mobile/sync/`;
   const response = await axios.post(url);
   console.log(response.data);
 });
 
 // Define job for getting the service calls from the mobile app to the server
 defineJob("Get service calls from mobile app", async () => {
-  const url = "http://localhost:3001/api/v1/service-calls/server/sync/";
+  const url = `${apiUrl}/service-calls/server/sync/`;
   const response = await axios.get(url);
   console.log(response.data);
 });
 
 // Define job for syncing technicians to mobile app
 defineJob("Send technicians to mobile app", async () => {
-  const url = "http://localhost:3001/api/v1/technicians/mobile/sync/100";
+  const url = `${apiUrl}/technicians/mobile/sync/100`;
   const response = await axios.get(url);
   console.log(response.data);
 });
 
 // Define job for getting the tabulator data to the server
 defineJob("Get tabulator data to server", async () => {
-  const url = "http://localhost:3001/api/v1/tabulator/sync";
+  const url = `${apiUrl}/tabulator/sync`;
   const response = await axios.get(url);
   console.log(response.data);
 });
 
 // Define job for sending the tabulator data to mobile app
 defineJob("Send tabulator data to mobile app", async () => {
-  const url = "http://localhost:3001/api/v1/tabulator/mobile/sync/10000";
+  const url = `${apiUrl}/tabulator/mobile/sync/10000`;
   const response = await axios.post(url);
   console.log(response.data);
 });
 
 // Define job for getting products to server
 defineJob("Get products to server", async () => {
-  const url = "http://localhost:3001/api/v1/products/sync/1000";
+  const url = `${apiUrl}/products/sync/1000`;
   const response = await axios.get(url);
   console.log(response.data);
 });
 
 // Define job for sending the products to mobile app
 defineJob("Send products to mobile app", async () => {
-  const url = "http://localhost:3001/api/v1/products/mobile/sync/";
+  const url = `${apiUrl}/products/mobile/sync/`;
   const response = await axios.get(url); // Review if change post to get
   console.log(response.data);
 });
