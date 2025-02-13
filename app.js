@@ -8,7 +8,6 @@ var Agendash = require("agendash");
 const axios = require("axios");
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
 
 var app = express();
 
@@ -103,7 +102,6 @@ defineJob("Send products to mobile app", async () => {
 })();
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
 // Initialize Agendash (Dashboard) after Agenda is connected
 app.use("/dash", Agendash(agenda));
 
