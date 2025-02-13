@@ -3,7 +3,8 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-var { Agenda } = require("@hokify/agenda");
+var Agenda = require("agenda");
+var Agendash = require("agendash");
 const axios = require("axios");
 
 var indexRouter = require("./routes/index");
@@ -22,7 +23,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // Initialize Agenda
-const agenda = new Agenda({
+var agenda = new Agenda({
   db: { address: "mongodb://localhost:27017/agenda" },
 });
 
@@ -103,6 +104,8 @@ defineJob("Send products to mobile app", async () => {
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+// Initialize Agendash (Dashboard) after Agenda is connected
+app.use("/dash", Agendash(agenda));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
