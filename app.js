@@ -77,6 +77,14 @@ defineJob("Send technicians to mobile app", async () => {
   return response;
 });
 
+// Define job for syncing business partners to server
+defineJob("Get business partners to server", async () => {
+  const url = `${apiUrl}/business-partners/sync/1000`;
+  const response = await axios.get(url);
+  console.log(response.data);
+  return response;
+});
+
 // Define job for getting the tabulator data to the server
 defineJob("Get tabulator data to server", async () => {
   const url = `${apiUrl}/tabulator/sync/1000`;
@@ -125,6 +133,9 @@ defineJob("Send products to mobile app", async () => {
     );
     await agenda.now("Send service calls to mobile app");
   });
+
+  // Sync business partners
+  await agenda.every("1 hours", "Get business partners to server");
 
   // Sync products and tabulator data
   await agenda.every("2 hours", "Get products to server");
