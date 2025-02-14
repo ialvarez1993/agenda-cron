@@ -1,5 +1,16 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  .container
+    .jumbotron.text-center
+      h1= title
+      p.lead Welcome to #{title}, your personal agenda manager.
+      p
+        | This is a simple and elegant agenda management tool to help you keep track tasks and jobs for tech support tickets with the mobile app and SAP.
+      
+      .container-fluid
+        .row
+          .col-md-12
+            a.btn.btn-primary.btn-lg(href='/dash') Dashboard
+            br
+            a.btn.btn-primary.btn-lg(href='http://192.168.21.231:3001/api-docs/') Docs
