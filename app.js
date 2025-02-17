@@ -30,9 +30,22 @@ var agenda = new Agenda({
 
 // Function to define a job with a given name and a given function
 function defineJob(name, func) {
-  agenda.define(name, async (job) => {
+  agenda.define(name, async (job, done) => {
     console.log(`${name} executed`);
-    await func();
+    try {
+      const response = await func();
+      job.attrs.data = response.data; // Store response data in job attributes
+      await job.save(); // Save job attributes
+      done();
+    } catch (error) {
+      job.attrs.data = {
+        error: error.response ? error.response.data : error.message,
+        noResponse: !error.response,
+        timeout: error.code === "ECONNABORTED", // Check if error is a timeout
+      }; // Store error and timeout flag in job attributes
+      await job.save(); // Save job attributes
+      done(error);
+    }
   });
 }
 
@@ -41,57 +54,100 @@ function defineJob(name, func) {
 // Define a sync service calls from SAP
 defineJob("Get service calls from SAP", async () => {
   const url = `${apiUrl}/service-calls/sap/sync/`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
 });
 
 // Define job for sending service calls to mobile app
 defineJob("Send service calls to mobile app", async () => {
   const url = `${apiUrl}/service-calls/mobile/sync/`;
-  const response = await axios.post(url);
+  const response = await axios.post(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
 });
 
 // Define job for getting the service calls from the mobile app to the server
 defineJob("Get service calls from mobile app", async () => {
   const url = `${apiUrl}/service-calls/server/sync/`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
 });
 
 // Define job for syncing technicians to mobile app
 defineJob("Send technicians to mobile app", async () => {
   const url = `${apiUrl}/technicians/mobile/sync/100`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
+});
+
+// Define job for syncing business partners to server
+defineJob("Get business partners to server", async () => {
+  const url = `${apiUrl}/business-partners/sync/1000`;
+  const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
+  console.log(response.data);
+  return response;
 });
 
 // Define job for getting the tabulator data to the server
 defineJob("Get tabulator data to server", async () => {
-  const url = `${apiUrl}/tabulator/sync`;
-  const response = await axios.get(url);
+  const url = `${apiUrl}/tabulator/sync/1000`;
+  const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
 });
 
 // Define job for sending the tabulator data to mobile app
 defineJob("Send tabulator data to mobile app", async () => {
-  const url = `${apiUrl}/tabulator/mobile/sync/10000`;
-  const response = await axios.post(url);
+  const url = `${apiUrl}/tabulator/mobile/sync/1000`;
+  const response = await axios.post(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
 });
 
 // Define job for getting products to server
 defineJob("Get products to server", async () => {
   const url = `${apiUrl}/products/sync/1000`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
 });
 
 // Define job for sending the products to mobile app
 defineJob("Send products to mobile app", async () => {
-  const url = `${apiUrl}/products/mobile/sync/`;
-  const response = await axios.get(url); // Review if change post to get
+  const url = `${apiUrl}/products/mobile/sync/1000`;
+  const response = await axios.get(url, { timeout: 5000 }); // Review if change post to get
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
+  return response;
 });
 
 // Start Agenda
@@ -111,11 +167,20 @@ defineJob("Send products to mobile app", async () => {
     await agenda.now("Send service calls to mobile app");
   });
 
+  // Sync business partners
+  await agenda.every("1 hours", "Get business partners to server");
+
   // Sync products and tabulator data
   await agenda.every("2 hours", "Get products to server");
   await agenda.every("3 hours", "Send products to mobile app");
   await agenda.every("3 hours", "Get tabulator data to server");
   await agenda.every("4 hours", "Send tabulator data to mobile app");
+
+  // Retry on fail
+  agenda.on("fail", async (err, job) => {
+    console.error(`Job ${job.attrs.name} failed with error: ${err.message}`);
+    await job.schedule("in 1 minute").save();
+  });
 })();
 
 app.use("/", indexRouter);
