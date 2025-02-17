@@ -38,10 +38,10 @@ function defineJob(name, func) {
       await job.save(); // Save job attributes
       done();
     } catch (error) {
-      console.error(error.response ? error.response.data : error.message);
       job.attrs.data = {
         error: error.response ? error.response.data : error.message,
-        timeout: error.code === "ECONNABORTED" ? true : false, // Check if error is a timeout
+        noResponse: !error.response,
+        timeout: error.code === "ECONNABORTED", // Check if error is a timeout
       }; // Store error and timeout flag in job attributes
       await job.save(); // Save job attributes
       done(error);
@@ -55,6 +55,9 @@ function defineJob(name, func) {
 defineJob("Get service calls from SAP", async () => {
   const url = `${apiUrl}/service-calls/sap/sync/`;
   const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -63,6 +66,9 @@ defineJob("Get service calls from SAP", async () => {
 defineJob("Send service calls to mobile app", async () => {
   const url = `${apiUrl}/service-calls/mobile/sync/`;
   const response = await axios.post(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -71,6 +77,9 @@ defineJob("Send service calls to mobile app", async () => {
 defineJob("Get service calls from mobile app", async () => {
   const url = `${apiUrl}/service-calls/server/sync/`;
   const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -79,6 +88,9 @@ defineJob("Get service calls from mobile app", async () => {
 defineJob("Send technicians to mobile app", async () => {
   const url = `${apiUrl}/technicians/mobile/sync/100`;
   const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -87,6 +99,9 @@ defineJob("Send technicians to mobile app", async () => {
 defineJob("Get business partners to server", async () => {
   const url = `${apiUrl}/business-partners/sync/1000`;
   const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -95,6 +110,9 @@ defineJob("Get business partners to server", async () => {
 defineJob("Get tabulator data to server", async () => {
   const url = `${apiUrl}/tabulator/sync/1000`;
   const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -103,6 +121,9 @@ defineJob("Get tabulator data to server", async () => {
 defineJob("Send tabulator data to mobile app", async () => {
   const url = `${apiUrl}/tabulator/mobile/sync/1000`;
   const response = await axios.post(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -111,6 +132,9 @@ defineJob("Send tabulator data to mobile app", async () => {
 defineJob("Get products to server", async () => {
   const url = `${apiUrl}/products/sync/1000`;
   const response = await axios.get(url, { timeout: 5000 });
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
@@ -119,6 +143,9 @@ defineJob("Get products to server", async () => {
 defineJob("Send products to mobile app", async () => {
   const url = `${apiUrl}/products/mobile/sync/1000`;
   const response = await axios.get(url, { timeout: 5000 }); // Review if change post to get
+  if (!response) {
+    throw new Error("No response received from the server");
+  }
   console.log(response.data);
   return response;
 });
