@@ -155,11 +155,11 @@ defineJob("Send products to mobile app", async () => {
   await agenda.start();
 
   // Sync service calls
-  await agenda.every("*/2 8-22 * * *", "Get service calls from mobile app");
-  await agenda.every("*/3 8-22 * * *", "Get service calls from SAP");
+  await agenda.every("*/2 8-21 * * *", "Get service calls from mobile app");
+  await agenda.every("*/3 8-21 * * *", "Get service calls from SAP");
 
   // Sync technicians and then send new service calls
-  await agenda.every("*/5 8-22 * * *", "Send technicians to mobile app");
+  await agenda.every("*/5 8-21 * * *", "Send technicians to mobile app");
   agenda.on("success:Send technicians to mobile app", async (job) => {
     console.log(
       "Technicians successfully synced to mobile app, now syncing service calls to mobile app"
@@ -168,13 +168,13 @@ defineJob("Send products to mobile app", async () => {
   });
 
   // Sync business partners
-  await agenda.every("0 8-22 * * *", "Get business partners to server");
+  await agenda.every("0 8-21 * * *", "Get business partners to server");
 
   // Sync products and tabulator data
-  await agenda.every("0 */2 8-22 * *", "Get products to server");
-  await agenda.every("0 */3 8-22 * *", "Send products to mobile app");
-  await agenda.every("0 */3 8-22 * *", "Get tabulator data to server");
-  await agenda.every("0 */4 8-22 * *", "Send tabulator data to mobile app");
+  await agenda.every("0 */2 8-21 * *", "Get products to server");
+  await agenda.every("0 */3 8-21 * *", "Send products to mobile app");
+  await agenda.every("0 */3 8-21 * *", "Get tabulator data to server");
+  await agenda.every("0 */4 8-21 * *", "Send tabulator data to mobile app");
 
   // Retry on fail
   agenda.on("fail", async (err, job) => {
