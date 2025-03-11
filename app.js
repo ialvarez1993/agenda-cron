@@ -54,7 +54,7 @@ function defineJob(name, func) {
 // Define a sync service calls from SAP
 defineJob("Get service calls from SAP", async () => {
   const url = `${apiUrl}/service-calls/sap/sync/`;
-  const response = await axios.get(url, { timeout: 5000 });
+  const response = await axios.get(url, { timeout: 15 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -65,7 +65,7 @@ defineJob("Get service calls from SAP", async () => {
 // Define job for sending service calls to mobile app
 defineJob("Send service calls to mobile app", async () => {
   const url = `${apiUrl}/service-calls/mobile/sync/`;
-  const response = await axios.post(url, { timeout: 5000 });
+  const response = await axios.post(url, { timeout: 15 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -76,7 +76,7 @@ defineJob("Send service calls to mobile app", async () => {
 // Define job for getting the service calls from the mobile app to the server
 defineJob("Get service calls from mobile app", async () => {
   const url = `${apiUrl}/service-calls/server/sync/`;
-  const response = await axios.get(url, { timeout: 5000 });
+  const response = await axios.get(url, { timeout: 15 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -87,7 +87,7 @@ defineJob("Get service calls from mobile app", async () => {
 // Define job for syncing technicians to mobile app
 defineJob("Send technicians to mobile app", async () => {
   const url = `${apiUrl}/technicians/mobile/sync/100`;
-  const response = await axios.get(url, { timeout: 5000 });
+  const response = await axios.get(url, { timeout: 10 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -98,7 +98,7 @@ defineJob("Send technicians to mobile app", async () => {
 // Define job for syncing business partners to server
 defineJob("Get business partners to server", async () => {
   const url = `${apiUrl}/business-partners/sync/1000`;
-  const response = await axios.get(url, { timeout: 5000 });
+  const response = await axios.get(url, { timeout: 10 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -109,7 +109,7 @@ defineJob("Get business partners to server", async () => {
 // Define job for getting the tabulator data to the server
 defineJob("Get tabulator data to server", async () => {
   const url = `${apiUrl}/tabulator/sync/1000`;
-  const response = await axios.get(url, { timeout: 5000 });
+  const response = await axios.get(url, { timeout: 25 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -120,7 +120,7 @@ defineJob("Get tabulator data to server", async () => {
 // Define job for sending the tabulator data to mobile app
 defineJob("Send tabulator data to mobile app", async () => {
   const url = `${apiUrl}/tabulator/mobile/sync/1000`;
-  const response = await axios.post(url, { timeout: 25000 });
+  const response = await axios.post(url, { timeout: 25 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -131,7 +131,7 @@ defineJob("Send tabulator data to mobile app", async () => {
 // Define job for getting products to server
 defineJob("Get products to server", async () => {
   const url = `${apiUrl}/products/sync/1000`;
-  const response = await axios.get(url, { timeout: 5000 });
+  const response = await axios.get(url, { timeout: 25 * 60 * 1000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -142,7 +142,7 @@ defineJob("Get products to server", async () => {
 // Define job for sending the products to mobile app
 defineJob("Send products to mobile app", async () => {
   const url = `${apiUrl}/products/mobile/sync/1000`;
-  const response = await axios.get(url, { timeout: 5000 }); // Review if change post to get
+  const response = await axios.get(url, { timeout: 25 * 60 * 1000 }); // Review if change post to get
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -155,11 +155,11 @@ defineJob("Send products to mobile app", async () => {
   await agenda.start();
 
   // Sync service calls
-  await agenda.every("*/2 8-22 * * *", "Get service calls from mobile app");
-  await agenda.every("*/3 8-22 * * *", "Get service calls from SAP");
+  await agenda.every("*/2 8-21 * * *", "Get service calls from mobile app");
+  await agenda.every("*/3 8-21 * * *", "Get service calls from SAP");
 
   // Sync technicians and then send new service calls
-  await agenda.every("*/5 8-22 * * *", "Send technicians to mobile app");
+  await agenda.every("*/5 8-21 * * *", "Send technicians to mobile app");
   agenda.on("success:Send technicians to mobile app", async (job) => {
     console.log(
       "Technicians successfully synced to mobile app, now syncing service calls to mobile app"
@@ -168,16 +168,16 @@ defineJob("Send products to mobile app", async () => {
   });
 
   // Sync business partners
-  await agenda.every("0 8-22 * * *", "Get business partners to server");
+  await agenda.every("0 8-21 * * *", "Get business partners to server");
 
-  // Sync products to server every 2 hours between 8 AM and 10 PM
-  await agenda.every("0 */2 8-22 * *", "Get products to server");
+  // Sync products to server every 2 hours between 8 AM and 9 PM
+  await agenda.every("0 */2 8-21 * *", "Get products to server");
 
-  // Send products to mobile app every 3 hours between 8 AM and 10 PM
-  await agenda.every("0 */3 8-22 * *", "Send products to mobile app");
+  // Send products to mobile app every 3 hours between 8 AM and 9 PM
+  await agenda.every("0 */3 8-21 * *", "Send products to mobile app");
 
-  // Sync tabulator data to server every 4 hours between 8 AM and 10 PM
-  await agenda.every("0 */4 8-22 * *", "Get tabulator data to server");
+  // Sync tabulator data to server every 4 hours between 8 AM and 9 PM
+  await agenda.every("0 */4 8-21 * *", "Get tabulator data to server");
   agenda.on("success:Get tabulator data to server", async (job) => {
     console.log(
       "Tabulator data successfully synced to server, now syncing to mobile app"
