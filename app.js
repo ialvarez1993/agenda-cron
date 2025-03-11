@@ -170,14 +170,14 @@ defineJob("Send products to mobile app", async () => {
   // Sync business partners
   await agenda.every("0 8-21 * * *", "Get business partners to server");
 
-  // Sync products to server every 2 hours between 8 AM and 10 PM
-  await agenda.every("0 */2 8-22 * *", "Get products to server");
+  // Sync products to server every 2 hours between 8 AM and 9 PM
+  await agenda.every("0 */2 8-21 * *", "Get products to server");
 
-  // Send products to mobile app every 3 hours between 8 AM and 10 PM
-  await agenda.every("0 */3 8-22 * *", "Send products to mobile app");
+  // Send products to mobile app every 3 hours between 8 AM and 9 PM
+  await agenda.every("0 */3 8-21 * *", "Send products to mobile app");
 
-  // Sync tabulator data to server every 4 hours between 8 AM and 10 PM
-  await agenda.every("0 */4 8-22 * *", "Get tabulator data to server");
+  // Sync tabulator data to server every 4 hours between 8 AM and 9 PM
+  await agenda.every("0 */4 8-21 * *", "Get tabulator data to server");
   agenda.on("success:Get tabulator data to server", async (job) => {
     console.log(
       "Tabulator data successfully synced to server, now syncing to mobile app"
