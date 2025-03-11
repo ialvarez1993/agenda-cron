@@ -120,7 +120,7 @@ defineJob("Get tabulator data to server", async () => {
 // Define job for sending the tabulator data to mobile app
 defineJob("Send tabulator data to mobile app", async () => {
   const url = `${apiUrl}/tabulator/mobile/sync/1000`;
-  const response = await axios.post(url, { timeout: 5000 });
+  const response = await axios.post(url, { timeout: 25000 });
   if (!response) {
     throw new Error("No response received from the server");
   }
@@ -170,11 +170,20 @@ defineJob("Send products to mobile app", async () => {
   // Sync business partners
   await agenda.every("0 8-22 * * *", "Get business partners to server");
 
-  // Sync products and tabulator data
+  // Sync products to server every 2 hours between 8 AM and 10 PM
   await agenda.every("0 */2 8-22 * *", "Get products to server");
+
+  // Send products to mobile app every 3 hours between 8 AM and 10 PM
   await agenda.every("0 */3 8-22 * *", "Send products to mobile app");
-  await agenda.every("0 */3 8-22 * *", "Get tabulator data to server");
-  await agenda.every("0 */4 8-22 * *", "Send tabulator data to mobile app");
+
+  // Sync tabulator data to server every 4 hours between 8 AM and 10 PM
+  await agenda.every("0 */4 8-22 * *", "Get tabulator data to server");
+  agenda.on("success:Get tabulator data to server", async (job) => {
+    console.log(
+      "Tabulator data successfully synced to server, now syncing to mobile app"
+    );
+    await agenda.now("Send tabulator data to mobile app");
+  });
 
   // Retry on fail
   agenda.on("fail", async (err, job) => {
