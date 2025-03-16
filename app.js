@@ -46,11 +46,6 @@ function defineJob(name, func) {
       await job.save(); // Save job attributes
       done(error);
     }
-    // Add locktime for the same duration of the job
-    await job.lock(
-      job.attrs.nextRunAt.getTime() - new Date().getTime() + 1000,
-      { skipImmediate: true }
-    );
   });
 }
 
@@ -160,11 +155,11 @@ defineJob("Send products to mobile app", async () => {
   await agenda.start();
 
   // Sync service calls
-  await agenda.every("every 2 minutes between 8am and 9pm", "Get service calls from mobile app");
-  await agenda.every("every 3 minutes between 8am and 9pm", "Get service calls from SAP");
+  await agenda.every("*/2 8-21 * * *", "Get service calls from mobile app");
+  await agenda.every("*/3 8-21 * * *", "Get service calls from SAP");
 
   // Sync technicians and then send new service calls
-  await agenda.every("5 minutes", "Send technicians to mobile app");
+  await agenda.every("*/5 8-21 * * *", "Send technicians to mobile app");
   agenda.on("success:Send technicians to mobile app", async (job) => {
     console.log(
       "Technicians successfully synced to mobile app, now syncing service calls to mobile app"
@@ -173,16 +168,16 @@ defineJob("Send products to mobile app", async () => {
   });
 
   // Sync business partners
-  await agenda.every("every 1 hour between 8am and 9pm", "Get business partners to server");
+  await agenda.every("0 8-21 * * *", "Get business partners to server");
 
   // Sync products to server every 2 hours between 8 AM and 9 PM
-  await agenda.every("every 3 hours between 8am and 9pm", "Get products to server");
+  await agenda.every("0 */2 8-21 * *", "Get products to server");
 
   // Send products to mobile app every 3 hours between 8 AM and 9 PM
-  await agenda.every("every 4 hours between 8am and 9pm", "Send products to mobile app");
+  await agenda.every("0 */3 8-21 * *", "Send products to mobile app");
 
-  // Sync tabulator data to server only at 12PM
-  await agenda.every("0 12 * * *", "Get tabulator data to server");
+  // Sync tabulator data to server every 4 hours between 8 AM and 9 PM
+  await agenda.every("0 */4 8-21 * *", "Get tabulator data to server");
   agenda.on("success:Get tabulator data to server", async (job) => {
     console.log(
       "Tabulator data successfully synced to server, now syncing to mobile app"
@@ -193,7 +188,7 @@ defineJob("Send products to mobile app", async () => {
   // Retry on fail
   agenda.on("fail", async (err, job) => {
     console.error(`Job ${job.attrs.name} failed with error: ${err.message}`);
-    await job.schedule("in 10 minute").save();
+    await job.schedule("in 1 minute").save();
   });
 })();
 
