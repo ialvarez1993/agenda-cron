@@ -46,6 +46,10 @@ function defineJob(name, func) {
       await job.save(); // Save job attributes
       done(error);
     }
+    // Add locktime for the same duration of the job
+    await job.lock(
+      job.attrs.nextRunAt.getTime() - new Date().getTime() + 1000
+    );
   });
 }
 
