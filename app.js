@@ -193,7 +193,7 @@ defineJob("Send products to mobile app", async () => {
   // Retry on fail
   agenda.on("fail", async (err, job) => {
     console.error(`Job ${job.attrs.name} failed with error: ${err.message}`);
-    await job.schedule("in 1 minute").save();
+    await job.schedule("in 10 minute").save();
   });
 })();
 
