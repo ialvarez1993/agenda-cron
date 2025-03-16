@@ -48,7 +48,8 @@ function defineJob(name, func) {
     }
     // Add locktime for the same duration of the job
     await job.lock(
-      job.attrs.nextRunAt.getTime() - new Date().getTime() + 1000
+      job.attrs.nextRunAt.getTime() - new Date().getTime() + 1000,
+      { skipImmediate: true }
     );
   });
 }
